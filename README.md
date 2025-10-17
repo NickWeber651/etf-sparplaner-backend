@@ -9,3 +9,5 @@ Die Anwendung simuliert die Vermögensentwicklung (Sparrate + Zinseszins) und be
 
 
 Nick Da G, ist der G!
+
+c
