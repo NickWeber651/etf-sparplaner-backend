@@ -3,7 +3,9 @@ Der **ETF-Sparplaner** ist eine schlanke Web-App, mit der Nutzer ETF-Sparpläne 
 Die Anwendung simuliert die Vermögensentwicklung (Sparrate + Zinseszins) und bereitet einfache KPIs/Verläufe auf.
 
 ## Team
+
 - **Nick Weber** – Matr.-Nr. **596383**
-- **Leon** – Matr.-Nr. **xxx** _(bitte ersetzen und pushen)_
+- **Leon** – Matr.-Nr. s05968986
 
 
+Nick Da G, ist der G!
