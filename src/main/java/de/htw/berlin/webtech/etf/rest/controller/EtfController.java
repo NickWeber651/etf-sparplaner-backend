@@ -1,4 +1,4 @@
-package de.htw.berlin.webtech.etf;
+package de.htw.berlin.webtech.etf.rest.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
