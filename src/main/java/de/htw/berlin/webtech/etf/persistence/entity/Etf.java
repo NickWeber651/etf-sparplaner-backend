@@ -1,4 +1,4 @@
-package de.htw.berlin.webtech.etf.rest.controller;
+package de.htw.berlin.webtech.etf.persistence.entity;
 
 public class Etf {
     private Long id;
