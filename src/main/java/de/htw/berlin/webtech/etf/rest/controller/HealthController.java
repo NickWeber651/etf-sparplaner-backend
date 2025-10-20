@@ -11,10 +11,6 @@ import java.util.Map;
  */
 @RestController                       // macht die Klasse zu einem Web-Controller (JSON)
 @RequestMapping("/api")               // alle Methoden hier hängen unter /api
-@CrossOrigin(origins = {              // erlaubt Zugriffe vom Frontend (Dev + optional Pages)
-        "http://localhost:5173",
-        "https://nickweber651.github.io"
-})
 
 public class HealthController {
     /**
