@@ -1,19 +1,19 @@
 package de.htw.berlin.webtech.etf.persistence.entity;
 
-public class Etf {
+public class EtfObject {
     private Long id;
     private String name;
     private String isin;
     private double ter;
 
-    public Etf(Long id, String name, String isin, double ter) {
+    public EtfObject(Long id, String name, String isin, double ter) {
         this.id = id;
         this.name = name;
         this.isin = isin;
         this.ter = ter;
     }
 
-    public Etf() {} // leerer Konstruktor (wichtig für später)
+    public EtfObject() {} // leerer Konstruktor (wichtig für später)
 
     public Long getId() {
         return id;
