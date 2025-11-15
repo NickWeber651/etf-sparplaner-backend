@@ -18,7 +18,8 @@ public class WebConfig implements WebMvcConfigurer{
                 .addMapping("/**") // gilt für alle Endpunkte
                 .allowedOrigins(
                         "http://localhost:5173",          // Vite Dev
-                        "https://nickweber651.github.io"  // optional: GitHub Pages
+                        "https://nickweber651.github.io",  // optional: GitHub Pages
+                        "https://etf-sparplaner-fronted.onrender.com" // Render-Frontend
                 )
                 .allowedMethods("GET","HEAD","POST","PUT","PATCH","DELETE","OPTIONS")
                 .allowedHeaders("*")
