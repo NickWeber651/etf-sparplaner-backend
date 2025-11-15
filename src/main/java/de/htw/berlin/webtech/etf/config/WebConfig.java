@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Globale CORS-Konfiguration:
- * Erlaubt dem Frontend (Vite: localhost:5173, optional GitHub Pages),
+ * Erlaubt dem Frontend (Vite: localhost:5173, optiona  l GitHub Pages),
  * Requests ans Backend zu schicken. So musst du nicht an jedem Controller @CrossOrigin setzen.
  */
 @Configuration
