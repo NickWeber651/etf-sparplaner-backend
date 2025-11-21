@@ -11,7 +11,7 @@ import java.util.Map;
  */
 @RestController                       // macht die Klasse zu einem Web-Controller (JSON)
 @RequestMapping("/api")               // alle Methoden hier hängen unter /api
-
+@CrossOrigin(origins = "http://localhost:5173")
 public class HealthController {
     /**
      * GET /api/health
