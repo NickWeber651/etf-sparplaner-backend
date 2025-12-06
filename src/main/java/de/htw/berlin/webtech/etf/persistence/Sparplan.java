@@ -20,24 +20,17 @@ public class Sparplan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Name darf nicht leer sein")
-    @Size(max = 100)
-    private String name;
+    @NotBlank(message = "ETF-Name ist erforderlich")
+    @Size(max = 200)
+    private String etfName;
 
     @NotNull(message = "Monatliche Rate ist erforderlich")
     @DecimalMin(value = "0.01", message = "Rate muss mindestens 0.01 sein")
     private BigDecimal monatlicheRate;
 
-    @NotBlank(message = "ETF-Name ist erforderlich")
-    @Size(max = 100)
-    private String etfName;
-
-    @NotNull(message = "Laufzeit in Monaten ist erforderlich")
-    @Min(value = 1, message = "Laufzeit muss mindestens 1 Monat sein")
-    private Integer laufzeitMonate;
-
-    @NotBlank(message = "Risikoprofil ist erforderlich")
-    private String risikoprofil;
+    @NotNull(message = "Laufzeit ist erforderlich")
+    @Min(value = 1, message = "Laufzeit muss mindestens 1 Jahr sein")
+    private Integer laufzeitJahre;
 
     @Column(updatable = false)
     private LocalDate erstelltAm;

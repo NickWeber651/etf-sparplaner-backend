@@ -35,6 +35,9 @@ dependencies {
     // Postgres-Treiber (nur zur Laufzeit nötig)
     runtimeOnly 'org.postgresql:postgresql:42.7.2'
 
+    // H2 für lokale Entwicklung
+    runtimeOnly 'com.h2database:h2'
+
     // Swagger / OpenAPI
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
