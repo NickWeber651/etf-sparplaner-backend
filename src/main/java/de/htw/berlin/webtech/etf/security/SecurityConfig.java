@@ -55,6 +55,15 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
 
+            // Bei fehlender/ungueltiger Authentifizierung: 401 Unauthorized
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(401);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"Nicht authentifiziert\"}");
+                })
+            )
+
             // H2-Console: Frame-Options deaktivieren (nur fuer Entwicklung)
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
 

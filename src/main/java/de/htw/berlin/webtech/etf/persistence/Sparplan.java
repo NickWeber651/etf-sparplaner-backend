@@ -1,5 +1,6 @@
 package de.htw.berlin.webtech.etf.persistence;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -23,9 +24,11 @@ public class Sparplan {
     /**
      * Referenz zum User - jeder Sparplan gehoert einem User.
      * FetchType.LAZY: User wird nur geladen wenn noetig.
+     * JsonIgnore: User wird nicht in JSON-Response serialisiert.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     @NotBlank(message = "ETF-Name ist erforderlich")

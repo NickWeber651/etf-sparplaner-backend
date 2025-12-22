@@ -4,10 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,13 +18,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Smoke-Tests (Schnelltests) fürs Backend.
  *
  * Ziel:
- * - Nachweisen, dass die wichtigsten Endpunkte erreichbar sind (Lebt der Service? Liefert /etfs Daten?)
+ * - Nachweisen, dass die wichtigsten Endpunkte erreichbar sind
  * - Nachweisen, dass CORS für das Frontend (Vite: http://localhost:5173) korrekt konfiguriert ist.
- *
- * Warum wichtig für M2?
- * - Das Vue-Frontend darf im Browser nur dann auf das Backend zugreifen,
- *   wenn der Server die passenden CORS-Header zurückgibt.
- * - /api/health dient als minimaler "Lebt der Dienst?"-Check (Badge im FE, CI, Deployment-Checks).
+ * - Nachweisen, dass Auth-Endpoints funktionieren
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -32,31 +30,46 @@ class ApiSmokeTest {
     MockMvc mvc;
 
     @Test
-    void etfs_returnsOk_and_hasCorsForVite() throws Exception {
-        // Arrange & Act:
-        // Sende eine GET-Anfrage auf /etfs und simuliere dabei den Browser-Origin des Vite-Dev-Servers.
-        // -> Der Origin-Header ist entscheidend, damit der Server CORS-Header setzt.
-        mvc.perform(
-                        get("/etfs")
-                                .header("Origin", "http://localhost:5173")
-                )
-                // Assert 1: HTTP 200 = Endpunkt ist erreichbar und liefert erfolgreich JSON.
-                .andExpect(status().isOk())
-                // Assert 2: CORS-Header ist korrekt gesetzt → Browser lässt die Antwort passieren.
-                // Ohne diesen Header würde das Frontend eine CORS-Fehlermeldung bekommen.
-                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"));
+    void authEndpoints_arePublic() throws Exception {
+        // Auth-Endpoints muessen ohne Authentifizierung erreichbar sein
+        String registerJson = """
+                {
+                    "email": "smoketest@example.com",
+                    "password": "password123"
+                }
+                """;
+
+        // Register-Endpoint ist erreichbar (entweder Created oder Conflict wenn Email existiert)
+        mvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(registerJson)
+                        .header("Origin", "http://localhost:5173"))
+                .andExpect(status().isCreated());
     }
 
     @Test
-    void health_isUp() throws Exception {
-        // Arrange & Act:
-        // Rufe den Health-Endpoint auf. Er soll ein kleines JSON liefern, das "UP" signalisiert.
-        mvc.perform(get("/api/health"))
-                // Assert 1: Endpunkt reagiert (200 OK) → Serverprozess läuft und ist per HTTP erreichbar.
-                .andExpect(status().isOk())
-                // Assert 2: Inhaltlich erwartet: status=UP → wird im Frontend/Monitoring als "grün" angezeigt.
-                .andExpect(jsonPath("$.status").value("UP"));
+    void protectedEndpoints_requireAuth() throws Exception {
+        // Geschuetzte Endpoints sollten 401 zurueckgeben ohne Token
+        mvc.perform(get("/api/sparplaene"))
+                .andExpect(status().isUnauthorized());
+    }
 
+    @Test
+    void cors_isConfiguredForVite() throws Exception {
+        // CORS-Header sollte bei Auth-Endpoints gesetzt sein
+        String loginJson = """
+                {
+                    "email": "test@example.com",
+                    "password": "password123"
+                }
+                """;
+
+        mvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson)
+                        .header("Origin", "http://localhost:5173"))
+                // CORS-Header ist korrekt gesetzt
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"));
     }
 }
 

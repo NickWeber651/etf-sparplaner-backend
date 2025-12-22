@@ -1,14 +1,17 @@
 package de.htw.berlin.webtech.etf;
 
 import de.htw.berlin.webtech.etf.persistence.Sparplan;
+import de.htw.berlin.webtech.etf.rest.AuthController.LoginRequest;
+import de.htw.berlin.webtech.etf.rest.AuthController.RegisterRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,6 +21,34 @@ class SparplanIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    private String jwtToken;
+
+    @BeforeEach
+    void setUp() {
+        // Registriere einen Test-User und hole JWT-Token
+        RegisterRequest registerRequest = new RegisterRequest(
+                "test" + System.currentTimeMillis() + "@example.com",
+                "password123"
+        );
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                "/api/auth/register",
+                registerRequest,
+                Map.class
+        );
+
+        if (response.getStatusCode() == HttpStatus.CREATED) {
+            jwtToken = (String) response.getBody().get("token");
+        }
+    }
+
+    private HttpHeaders createAuthHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwtToken);
+        return headers;
+    }
+
     @Test
     void shouldCreateAndRetrieveSparplan() {
         // Create a new Sparplan
@@ -26,9 +57,12 @@ class SparplanIntegrationTest {
         sparplan.setMonatlicheRate(new BigDecimal("200.00"));
         sparplan.setLaufzeitJahre(15);
 
-        ResponseEntity<Sparplan> postResponse = restTemplate.postForEntity(
+        HttpEntity<Sparplan> request = new HttpEntity<>(sparplan, createAuthHeaders());
+
+        ResponseEntity<Sparplan> postResponse = restTemplate.exchange(
                 "/api/sparplaene",
-                sparplan,
+                HttpMethod.POST,
+                request,
                 Sparplan.class
         );
 
@@ -41,8 +75,12 @@ class SparplanIntegrationTest {
         assertThat(postResponse.getBody().getErstelltAm()).isNotNull();
 
         // Retrieve all Sparplaene
-        ResponseEntity<Sparplan[]> getResponse = restTemplate.getForEntity(
+        HttpEntity<Void> getRequest = new HttpEntity<>(createAuthHeaders());
+
+        ResponseEntity<Sparplan[]> getResponse = restTemplate.exchange(
                 "/api/sparplaene",
+                HttpMethod.GET,
+                getRequest,
                 Sparplan[].class
         );
 
@@ -52,14 +90,45 @@ class SparplanIntegrationTest {
     }
 
     @Test
-    void shouldReturnEmptyListWhenNoSparplaene() {
-        ResponseEntity<Sparplan[]> response = restTemplate.getForEntity(
+    void shouldReturnEmptyListForNewUser() {
+        // Registriere einen neuen User
+        RegisterRequest registerRequest = new RegisterRequest(
+                "newuser" + System.currentTimeMillis() + "@example.com",
+                "password123"
+        );
+
+        ResponseEntity<Map> authResponse = restTemplate.postForEntity(
+                "/api/auth/register",
+                registerRequest,
+                Map.class
+        );
+
+        String newUserToken = (String) authResponse.getBody().get("token");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(newUserToken);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        ResponseEntity<Sparplan[]> response = restTemplate.exchange(
                 "/api/sparplaene",
+                HttpMethod.GET,
+                request,
                 Sparplan[].class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isEmpty();
+    }
+
+    @Test
+    void shouldReturn401WithoutAuthentication() {
+        ResponseEntity<String> response = restTemplate.getForEntity(
+                "/api/sparplaene",
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 }
 
