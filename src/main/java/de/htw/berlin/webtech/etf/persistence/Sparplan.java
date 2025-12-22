@@ -20,6 +20,14 @@ public class Sparplan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Referenz zum User - jeder Sparplan gehoert einem User.
+     * FetchType.LAZY: User wird nur geladen wenn noetig.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @NotBlank(message = "ETF-Name ist erforderlich")
     @Size(max = 200)
     private String etfName;
