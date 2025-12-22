@@ -33,13 +33,25 @@ public class SparplanController {
 
     /**
      * Holt einen einzelnen Sparplan (nur wenn er dem User gehoert).
+     * 404 wenn nicht gefunden, 403 wenn fremder User.
      */
     @GetMapping("/{id}")
     public ResponseEntity<Sparplan> getSparplan(@PathVariable Long id, Authentication authentication) {
         Long userId = getUserId(authentication);
-        return service.findByIdAndUserId(id, userId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+
+        // Erst pruefen ob der Sparplan dem User gehoert
+        var sparplan = service.findByIdAndUserId(id, userId);
+        if (sparplan.isPresent()) {
+            return ResponseEntity.ok(sparplan.get());
+        }
+
+        // Sparplan existiert, gehoert aber anderem User -> 403
+        if (service.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        // Sparplan existiert nicht -> 404
+        return ResponseEntity.notFound().build();
     }
 
     /**
@@ -54,6 +66,7 @@ public class SparplanController {
 
     /**
      * Aktualisiert einen bestehenden Sparplan (nur wenn er dem User gehoert).
+     * 404 wenn nicht gefunden, 403 wenn fremder User.
      */
     @PutMapping("/{id}")
     public ResponseEntity<Sparplan> updateSparplan(
@@ -61,20 +74,39 @@ public class SparplanController {
             @Valid @RequestBody Sparplan sparplan,
             Authentication authentication) {
         Long userId = getUserId(authentication);
-        return service.update(id, sparplan, userId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
+
+        var updated = service.update(id, sparplan, userId);
+        if (updated.isPresent()) {
+            return ResponseEntity.ok(updated.get());
+        }
+
+        // Sparplan existiert, gehoert aber anderem User -> 403
+        if (service.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        // Sparplan existiert nicht -> 404
+        return ResponseEntity.notFound().build();
     }
 
     /**
      * Loescht einen Sparplan (nur wenn er dem User gehoert).
+     * 404 wenn nicht gefunden, 403 wenn fremder User.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSparplan(@PathVariable Long id, Authentication authentication) {
         Long userId = getUserId(authentication);
+
         if (service.deleteByIdAndUserId(id, userId)) {
             return ResponseEntity.noContent().build();
         }
+
+        // Sparplan existiert, gehoert aber anderem User -> 403
+        if (service.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        // Sparplan existiert nicht -> 404
         return ResponseEntity.notFound().build();
     }
 

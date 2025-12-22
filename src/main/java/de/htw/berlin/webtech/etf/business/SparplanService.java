@@ -33,6 +33,13 @@ public class SparplanService {
     }
 
     /**
+     * Prueft ob ein Sparplan existiert (unabhaengig vom User).
+     */
+    public boolean existsById(Long id) {
+        return repository.existsById(id);
+    }
+
+    /**
      * Erstellt einen neuen Sparplan fuer den angegebenen User.
      */
     public Sparplan save(Sparplan sparplan, Long userId) {
