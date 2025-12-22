@@ -53,6 +53,20 @@ public class SparplanController {
     }
 
     /**
+     * Aktualisiert einen bestehenden Sparplan (nur wenn er dem User gehoert).
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<Sparplan> updateSparplan(
+            @PathVariable Long id,
+            @Valid @RequestBody Sparplan sparplan,
+            Authentication authentication) {
+        Long userId = getUserId(authentication);
+        return service.update(id, sparplan, userId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
+    }
+
+    /**
      * Loescht einen Sparplan (nur wenn er dem User gehoert).
      */
     @DeleteMapping("/{id}")

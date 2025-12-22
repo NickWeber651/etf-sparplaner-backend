@@ -43,6 +43,20 @@ public class SparplanService {
     }
 
     /**
+     * Aktualisiert einen Sparplan nur wenn er dem User gehoert.
+     * Gibt Optional.empty() zurueck wenn nicht gefunden oder nicht berechtigt.
+     */
+    public Optional<Sparplan> update(Long id, Sparplan updatedSparplan, Long userId) {
+        return repository.findByIdAndUserId(id, userId)
+                .map(existingSparplan -> {
+                    existingSparplan.setEtfName(updatedSparplan.getEtfName());
+                    existingSparplan.setMonatlicheRate(updatedSparplan.getMonatlicheRate());
+                    existingSparplan.setLaufzeitJahre(updatedSparplan.getLaufzeitJahre());
+                    return repository.save(existingSparplan);
+                });
+    }
+
+    /**
      * Loescht einen Sparplan nur wenn er dem User gehoert.
      * Gibt true zurueck wenn erfolgreich, false wenn nicht gefunden.
      */
