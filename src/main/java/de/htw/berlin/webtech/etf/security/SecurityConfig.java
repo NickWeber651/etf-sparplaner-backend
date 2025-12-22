@@ -92,8 +92,9 @@ public class SecurityConfig {
 
         // Erlaubte Origins (Frontend-URLs)
         configuration.setAllowedOrigins(Arrays.asList(
-            "http://localhost:5173",   // Vite Dev Server
-            "http://localhost:3000"    // Alternative
+            "http://localhost:5173",                          // Vite Dev Server
+            "https://nickweber651.github.io",                 // GitHub Pages
+            "https://etf-sparplaner-fronted.onrender.com"     // Render Frontend
         ));
 
         // Erlaubte HTTP-Methoden
