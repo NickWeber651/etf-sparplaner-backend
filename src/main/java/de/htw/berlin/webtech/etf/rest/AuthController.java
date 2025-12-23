@@ -100,6 +100,40 @@ public class AuthController {
     }
 
     /**
+     * Passwort-Reset fuer Benutzer die ihr Passwort vergessen haben.
+     * ACHTUNG: Keine Email-Verifizierung (da kein SMTP-Server)!
+     * In Produktion sollte hier ein Token per Email verschickt werden.
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        // Validierung
+        if (request.email() == null || request.email().isBlank()) {
+            return ResponseEntity.badRequest().body(error("Email ist erforderlich"));
+        }
+        if (request.newPassword() == null || request.newPassword().length() < 6) {
+            return ResponseEntity.badRequest().body(error("Passwort muss mindestens 6 Zeichen haben"));
+        }
+
+        // User suchen
+        Optional<User> userOptional = userRepository.findByEmail(request.email());
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(error("E-Mail-Adresse nicht gefunden"));
+        }
+
+        User user = userOptional.get();
+
+        // Neues Passwort hashen und speichern
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+
+        // Erfolg-Response
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Passwort erfolgreich geändert");
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Hilfsmethode: Erstellt Error-Response.
      */
     private Map<String, String> error(String message) {
@@ -123,5 +157,6 @@ public class AuthController {
 
     public record RegisterRequest(String email, String password) {}
     public record LoginRequest(String email, String password) {}
+    public record ResetPasswordRequest(String email, String newPassword) {}
 }
 
