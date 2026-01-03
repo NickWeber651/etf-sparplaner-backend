@@ -7,21 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Smoke-Tests (Schnelltests) fürs Backend.
- *
- * Ziel:
- * - Nachweisen, dass die wichtigsten Endpunkte erreichbar sind
- * - Nachweisen, dass CORS für das Frontend (Vite: http://localhost:5173) korrekt konfiguriert ist.
- * - Nachweisen, dass Auth-Endpoints funktionieren
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 class ApiSmokeTest {
@@ -29,17 +19,20 @@ class ApiSmokeTest {
     @Autowired
     MockMvc mvc;
 
+    private static String uniqueEmail() {
+        return "smoketest_" + System.currentTimeMillis() + "@example.com";
+    }
+
     @Test
-    void authEndpoints_arePublic() throws Exception {
-        // Auth-Endpoints muessen ohne Authentifizierung erreichbar sein
+    void authRegister_isPublic_andCreatesUser() throws Exception {
+        // Immer eindeutige E-Mail => kein 409-Conflict => Test bleibt stabil
         String registerJson = """
                 {
-                    "email": "smoketest@example.com",
+                    "email": "%s",
                     "password": "password123"
                 }
-                """;
+                """.formatted(uniqueEmail());
 
-        // Register-Endpoint ist erreichbar (entweder Created oder Conflict wenn Email existiert)
         mvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerJson)
@@ -49,27 +42,21 @@ class ApiSmokeTest {
 
     @Test
     void protectedEndpoints_requireAuth() throws Exception {
-        // Geschuetzte Endpoints sollten 401 zurueckgeben ohne Token
         mvc.perform(get("/api/sparplaene"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void cors_isConfiguredForVite() throws Exception {
-        // CORS-Header sollte bei Auth-Endpoints gesetzt sein
-        String loginJson = """
-                {
-                    "email": "test@example.com",
-                    "password": "password123"
-                }
-                """;
-
-        mvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(loginJson)
-                        .header("Origin", "http://localhost:5173"))
-                // CORS-Header ist korrekt gesetzt
-                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"));
+    void cors_preflight_allowsViteOrigin_forAuthEndpoints() throws Exception {
+        // Preflight ist der sauberste CORS-Test: unabhängig davon ob Login-User existiert
+        mvc.perform(options("/api/auth/login")
+                        .header("Origin", "http://localhost:5173")
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "Content-Type, Authorization"))
+                // je nach Setup ist 200 oder 204 üblich; Spring liefert oft 200
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"))
+                .andExpect(header().string("Vary", org.hamcrest.Matchers.containsString("Origin")))
+                .andExpect(header().string("Access-Control-Allow-Methods", org.hamcrest.Matchers.containsString("POST")));
     }
 }
-
