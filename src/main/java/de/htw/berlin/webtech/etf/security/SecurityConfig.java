@@ -94,7 +94,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:5173",                          // Vite Dev Server
             "https://nickweber651.github.io",                 // GitHub Pages
-            "https://etf-sparplaner-fronted.onrender.com"     // Render Frontend
+            "https://etf-sparplaner-fronted.onrender.com",
+                "https://etf-sparplaner-fronted-fi2c.onrender.com"// Render Frontend
         ));
 
         // Erlaubte HTTP-Methoden
