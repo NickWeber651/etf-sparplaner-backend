@@ -20,7 +20,7 @@ import java.util.Date;
 public class JwtService {
 
     // Secret Key aus application.properties (oder Fallback fuer Entwicklung)
-    @Value("${jwt.secret:mein-super-geheimer-schluessel-der-mindestens-256-bit-lang-sein-muss-12345}")
+    @Value("${jwt.secret}")
     private String secretKey;
 
     // Token-Gueltigkeit: 24 Stunden in Millisekunden
