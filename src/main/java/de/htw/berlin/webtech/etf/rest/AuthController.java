@@ -3,6 +3,7 @@ package de.htw.berlin.webtech.etf.rest;
 import de.htw.berlin.webtech.etf.business.JwtService;
 import de.htw.berlin.webtech.etf.persistence.User;
 import de.htw.berlin.webtech.etf.persistence.UserRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,26 +41,37 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        // Validierung
-        if (request.email() == null || request.email().isBlank()) {
+        // Validate email (null/blank) and normalize
+        String rawEmail = request.email();
+        if (rawEmail == null || rawEmail.isBlank()) {
             return ResponseEntity.badRequest().body(error("Email ist erforderlich"));
         }
+        String email = rawEmail.trim().toLowerCase();
+
+        // Validate password
         if (request.password() == null || request.password().length() < 6) {
             return ResponseEntity.badRequest().body(error("Passwort muss mindestens 6 Zeichen haben"));
         }
 
-        // Pruefen ob Email bereits existiert (keine Duplikate!)
-        if (userRepository.findByEmail(request.email()).isPresent()) {
+        // Check existence using normalized email
+        if (userRepository.findByEmail(email).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(error("Email ist bereits registriert"));
         }
 
-        // Neuen User erstellen
+        // Create and save new user with normalized email
         User user = new User();
-        user.setEmail(request.email());
+        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.password()));
 
-        User savedUser = userRepository.save(user);
+        User savedUser;
+        try {
+            savedUser = userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            // Defensive: in case a unique constraint race occurs in DB
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(error("Email ist bereits registriert"));
+        }
 
         // JWT-Token generieren
         String token = jwtService.generateToken(savedUser);
@@ -73,13 +85,15 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        // Validierung
+        // Basic validation
         if (request.email() == null || request.password() == null) {
             return ResponseEntity.badRequest().body(error("Email und Passwort sind erforderlich"));
         }
 
-        // User suchen
-        Optional<User> userOptional = userRepository.findByEmail(request.email());
+        String email = request.email().trim().toLowerCase();
+
+        // Find user by normalized email
+        Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(error("Email oder Passwort falsch"));
@@ -87,7 +101,6 @@ public class AuthController {
 
         User user = userOptional.get();
 
-        // Passwort pruefen
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(error("Email oder Passwort falsch"));
@@ -106,7 +119,6 @@ public class AuthController {
      */
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
-        // Validierung
         if (request.email() == null || request.email().isBlank()) {
             return ResponseEntity.badRequest().body(error("Email ist erforderlich"));
         }
@@ -114,20 +126,24 @@ public class AuthController {
             return ResponseEntity.badRequest().body(error("Passwort muss mindestens 6 Zeichen haben"));
         }
 
-        // User suchen
-        Optional<User> userOptional = userRepository.findByEmail(request.email());
+        String email = request.email().trim().toLowerCase();
+
+        Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(error("E-Mail-Adresse nicht gefunden"));
         }
 
         User user = userOptional.get();
-
-        // Neues Passwort hashen und speichern
         user.setPassword(passwordEncoder.encode(request.newPassword()));
-        userRepository.save(user);
 
-        // Erfolg-Response
+        try {
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(error("Fehler beim Speichern des neuen Passworts"));
+        }
+
         Map<String, String> response = new HashMap<>();
         response.put("message", "Passwort erfolgreich geändert");
         return ResponseEntity.ok(response);
