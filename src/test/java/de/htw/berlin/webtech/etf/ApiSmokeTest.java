@@ -51,8 +51,8 @@ class ApiSmokeTest {
         // Preflight ist der sauberste CORS-Test: unabhängig davon ob Login-User existiert
         mvc.perform(options("/api/auth/login")
                         .header("Origin", "http://localhost:5173")
-                        .header("Access-Controlå‚-Request-Method", "POST")
-                        .header("Access-Controlå-Request-Headers", "Content-Type, Authorization"))
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "Content-Type, Authorization"))
                 // je nach Setup ist 200 oder 204 üblich; Spring liefert oft 200
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"))
