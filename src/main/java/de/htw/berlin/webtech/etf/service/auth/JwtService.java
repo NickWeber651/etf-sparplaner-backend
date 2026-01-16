@@ -1,6 +1,6 @@
-package de.htw.berlin.webtech.etf.business;
+package de.htw.berlin.webtech.etf.service.auth;
 
-import de.htw.berlin.webtech.etf.persistence.User;
+import de.htw.berlin.webtech.etf.domain.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

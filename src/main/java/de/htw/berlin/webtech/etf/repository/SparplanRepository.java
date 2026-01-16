@@ -1,5 +1,6 @@
-package de.htw.berlin.webtech.etf.persistence;
+package de.htw.berlin.webtech.etf.repository;
 
+import de.htw.berlin.webtech.etf.domain.entity.Sparplan;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package de.htw.berlin.webtech.etf.persistence;
+package de.htw.berlin.webtech.etf.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

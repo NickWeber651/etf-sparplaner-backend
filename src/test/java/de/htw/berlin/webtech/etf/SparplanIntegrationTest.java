@@ -1,8 +1,8 @@
 package de.htw.berlin.webtech.etf;
 
-import de.htw.berlin.webtech.etf.persistence.Sparplan;
-import de.htw.berlin.webtech.etf.rest.AuthController.RegisterRequest;
-import de.htw.berlin.webtech.etf.rest.AuthController.LoginRequest;
+import de.htw.berlin.webtech.etf.domain.entity.Sparplan;
+import de.htw.berlin.webtech.etf.controller.AuthController.RegisterRequest;
+import de.htw.berlin.webtech.etf.controller.AuthController.LoginRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

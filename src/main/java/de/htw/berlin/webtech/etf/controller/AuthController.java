@@ -1,8 +1,8 @@
-package de.htw.berlin.webtech.etf.rest;
+package de.htw.berlin.webtech.etf.controller;
 
-import de.htw.berlin.webtech.etf.business.JwtService;
-import de.htw.berlin.webtech.etf.persistence.User;
-import de.htw.berlin.webtech.etf.persistence.UserRepository;
+import de.htw.berlin.webtech.etf.domain.entity.User;
+import de.htw.berlin.webtech.etf.repository.UserRepository;
+import de.htw.berlin.webtech.etf.service.auth.JwtService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

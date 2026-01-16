@@ -1,9 +1,9 @@
-package de.htw.berlin.webtech.etf.business;
+package de.htw.berlin.webtech.etf.service;
 
-import de.htw.berlin.webtech.etf.persistence.Sparplan;
-import de.htw.berlin.webtech.etf.persistence.SparplanRepository;
-import de.htw.berlin.webtech.etf.persistence.User;
-import de.htw.berlin.webtech.etf.persistence.UserRepository;
+import de.htw.berlin.webtech.etf.domain.entity.Sparplan;
+import de.htw.berlin.webtech.etf.domain.entity.User;
+import de.htw.berlin.webtech.etf.repository.SparplanRepository;
+import de.htw.berlin.webtech.etf.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

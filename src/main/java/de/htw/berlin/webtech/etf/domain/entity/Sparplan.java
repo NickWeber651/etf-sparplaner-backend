@@ -1,4 +1,4 @@
-package de.htw.berlin.webtech.etf.persistence;
+package de.htw.berlin.webtech.etf.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

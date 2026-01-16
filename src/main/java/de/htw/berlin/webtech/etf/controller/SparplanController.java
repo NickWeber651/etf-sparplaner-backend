@@ -1,7 +1,7 @@
-package de.htw.berlin.webtech.etf.rest;
+package de.htw.berlin.webtech.etf.controller;
 
-import de.htw.berlin.webtech.etf.business.SparplanService;
-import de.htw.berlin.webtech.etf.persistence.Sparplan;
+import de.htw.berlin.webtech.etf.domain.entity.Sparplan;
+import de.htw.berlin.webtech.etf.service.SparplanService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

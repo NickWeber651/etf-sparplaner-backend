@@ -1,6 +1,6 @@
 package de.htw.berlin.webtech.etf.security;
 
-import de.htw.berlin.webtech.etf.business.JwtService;
+import de.htw.berlin.webtech.etf.service.auth.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
